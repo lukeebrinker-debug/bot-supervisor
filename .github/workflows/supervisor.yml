@@ -1,0 +1,47 @@
+name: Bot supervisor
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # health + security check every ~15 min
+    - cron: '7 13 * * *'     # daily report, 13:07 UTC = about 8 AM US Central (daylight time)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'status=dry run | monitor | report | accept=trust my new code | reenable | recover=accept+reenable'
+        type: choice
+        options: [status, monitor, report, accept, reenable, recover]
+        default: status
+
+permissions:
+  contents: write
+
+concurrency:
+  group: supervisor
+  cancel-in-progress: false
+
+jobs:
+  supervise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Run supervisor
+        env:
+          GH_TOKEN: ${{ secrets.MONITOR_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            if [ "${{ github.event.schedule }}" = "7 13 * * *" ]; then MODE=report; else MODE=monitor; fi
+          fi
+          python supervisor.py --$MODE
+      - name: Save state
+        run: |
+          git config user.name "supervisor-bot"
+          git config user.email "supervisor-bot@users.noreply.github.com"
+          git add state.json || true
+          git diff --staged --quiet || (git commit -m "update state" && git pull --rebase && git push)
