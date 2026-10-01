@@ -5,7 +5,7 @@
   "bots": [
     {
       "name": "Motorcycle hunter",
-      "repo": "YOUR-GITHUB-USERNAME/gsxr600-hunter-part-two",
+      "repo": "lukeebrinker-debug/gsxr600-hunter-part-two",
       "workflows": [".github/workflows/hunt_part_two.yml"],
       "watch_files": ["bike_hunter_part_two.py", "requirements_part_two.txt"],
       "max_age_hours": 4,
@@ -13,7 +13,7 @@
     },
     {
       "name": "Trump stock watch",
-      "repo": "YOUR-GITHUB-USERNAME/trump-stock-watch",
+      "repo": "lukeebrinker-debug/trump-stock-watch",
       "workflows": [".github/workflows/trump-watch.yml"],
       "watch_files": ["trump_stock_watch.py", "trump_requirements.txt"],
       "max_age_hours": 2,
